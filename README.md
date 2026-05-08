@@ -1,6 +1,6 @@
-# <PLACEHOLDER_NAME>
+# PLugin Loader for Rust
 
-[![Build Status](https://github.com/Akazukin-Team/<PLACEHOLDER_REPO>/actions/workflows/build.yml/badge.svg)](https://github.com/Akazukin-Team/<PLACEHOLDER_REPO>/actions/workflows/build.yml)
+[![Build Status](https://github.com/Akazukin-Team/Rust-Plugin-Loader/actions/workflows/build.yml/badge.svg)](https://github.com/Akazukin-Team/Rust-Plugin-Loader/actions/workflows/build.yml)
 
 <PLACEHOLDER_DESCRIPTION>
 
@@ -40,7 +40,7 @@ Make sure you have the following installed:
 
 #### Using Cargo
 
-1. Add the following repository to the `<repositories>` block in your `pom.xml` file:
+    1. Add the following repository to the `<repositories>` block in your `pom.xml` file:
 
    ```toml
    [registries.akazukin-mixed]
@@ -70,8 +70,8 @@ To build the project from source, follow these steps:
 1. Clone the repository:
 
    ```shell
-   git clone https://github.com/Akazukin-Team/<PLACEHOLDER_REPO>.git
-   cd <PLACEHOLDER_REPO>
+   git clone https://github.com/Akazukin-Team/Rust-Plugin-Loader.git
+   cd Rust-Plugin-Loader
    ```
 
 2. Build the project with cargo:

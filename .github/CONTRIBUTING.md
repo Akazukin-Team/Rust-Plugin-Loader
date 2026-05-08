@@ -2,7 +2,6 @@
 
 This guide outlines how to report issues, suggest new features, and contribute code via Pull Requests (PRs).
 
-
 ---
 
 ## Table of Contents
@@ -20,7 +19,7 @@ please follow the instructions in [Reporting a Vulnerability](./SECURITY.md#repo
 
 If you discover a bug:
 
-1. Check the [issue tracker](https://github.com/Akazukin-Team/<PLACEHOLDER_REPO>/issues)
+1. Check the [issue tracker](https://github.com/Akazukin-Team/Rust-Plugin-Loader/issues)
    (including closed issues and PRs) to ensure it hasn’t already been reported or addressed.
 2. If the issue is new, open a new issue and fill out the template as thoroughly as possible. The more information you
    provide, the faster we can address it.

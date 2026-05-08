@@ -1,13 +1,14 @@
-[package]
-name = "<PLACEHOLDER_ARTIFACT>"
-version = "<PLACEHOLDER_VERSION>"
+[workspace]
+resolver = "3"
+members = ["crates/sample_app", "crates/loader_impl", "crates/plugin_api"]
+
+[workspace.package]
 authors = ["Akazukin-Team"]
-
 edition = "2024"
-rust-version="1.93.0"
-
-description = "<PLACEHOLDER_DESCRIPTION>"
+rust-version = "1.93.0"
 repository = "https://github.com/Akazukin-Team/<PLACEHOLDER_REPO>.git"
 
-
-[dependencies]
+[workspace.dependencies]
+tokio = { version = "1", features = ["full"] }
+typesafe_builder = "1.6.0"
+service = { version = "0.1.0", registry = "akazukin-mixed" }
