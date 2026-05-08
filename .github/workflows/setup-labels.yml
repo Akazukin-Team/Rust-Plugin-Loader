@@ -1,0 +1,92 @@
+name: Setup labels
+
+
+on:
+  workflow_dispatch:
+
+
+jobs:
+  setup_labels:
+    runs-on: ubuntu-24.04
+
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Delete Extra Labels
+        run: |
+          desired_labels=$(cat .github/labels.json | jq -c '[.[] | .name]')
+          
+          current_labels=$(gh api /repos/${GITHUB_REPOSITORY}/labels --jq '[.[] | .name]')
+
+          labels_to_delete=$(echo "${current_labels}" "${desired_labels}" | jq -sc '.[0] - .[1]')
+
+          echo "${labels_to_delete}" | jq -r '.[]' | while read -r name
+          do
+            gh api --method DELETE \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "/repos/${GITHUB_REPOSITORY}/labels/${name}"
+            echo "Deleted label: ${name}"
+          done
+
+      - name: Update Existing Labels
+        run: |
+          desired_labels=$(cat .github/labels.json)
+          
+          current_labels=$(gh api /repos/${GITHUB_REPOSITORY}/labels)
+          
+          echo "${desired_labels}" | jq -c '.[]' | while read -r label
+          do
+            name=$(echo "${label}" | jq -r '.name')
+            color=$(echo "${label}" | jq -r '.color')
+            description=$(echo "${label}" | jq -r '.description')
+          
+            matching_label=$(echo "${current_labels}" | jq -r --arg name "${name}" '.[] | select(.name == $name)')
+          
+            if [[ -n "${matching_label}" ]]; then
+              current_color=$(echo "${matching_label}" | jq -r '.color')
+              current_description=$(echo "${matching_label}" | jq -r '.description')
+          
+              if [[ "${color}" != "${current_color}" || "${description}" != "${current_description}" ]]; then
+                gh api --method PATCH \
+                  -H "Accept: application/vnd.github+json" \
+                  -H "X-GitHub-Api-Version: 2022-11-28" \
+                  "/repos/${GITHUB_REPOSITORY}/labels/${name}" \
+                  -f color="${color}" \
+                  -f description="${description}"
+                echo "Updated label: '${name}' (color: ${current_color} -> ${color}, description: '${current_description}' -> '${description}')"
+              fi
+            fi
+          done
+
+      - name: Add Missing Labels
+        run: |
+          desired_labels=$(cat .github/labels.json)
+          
+          current_labels=$(gh api /repos/${GITHUB_REPOSITORY}/labels --jq '[.[]]')
+          
+          missing_labels=$(echo "${desired_labels}" "${current_labels}" | jq -sc '[.[0][] | .name] - [.[1][] | .name]')
+          
+          echo "${missing_labels}" | jq -r '.[]' | while read -r label
+          do
+            matching_label=$(echo "${desired_labels}" | jq -r --arg name "${label}" '.[] | select(.name == $name)')
+          
+            name=$(echo "${matching_label}" | jq -r '.name')
+            color=$(echo "${matching_label}" | jq -r '.color')
+            description=$(echo "${matching_label}" | jq -r '.description')
+          
+            gh api --method POST \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              /repos/${GITHUB_REPOSITORY}/labels \
+              -f name="${name}" \
+              -f color="${color}" \
+              -f description="${description}"
+            echo "Added label: ${name}"
+          done

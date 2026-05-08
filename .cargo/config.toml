@@ -1,0 +1,11 @@
+[registries.akazukin-snapshots]
+index = "sparse+https://nexus.akazukin.org/repository/cargo-<PLACEHOLDER_REGISTRY>-snapshots/"
+credential-provider = "cargo:token"
+
+[registries.akazukin-releases]
+index = "sparse+https://nexus.akazukin.org/repository/cargo-<PLACEHOLDER_REGISTRY>-releases/"
+credential-provider = "cargo:token"
+
+[registries.akazukin-mixed]
+index = "sparse+https://nexus.akazukin.org/repository/cargo-<PLACEHOLDER_REGISTRY>/"
+credential-provider = "cargo:token"

@@ -1,0 +1,21 @@
+version: 2
+
+updates:
+  - package-ecosystem: "cargo"
+    directory: "/"
+    rebase-strategy: "disabled"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "cargo-deps:"
+    labels:
+      - bot/dependabot
+      - type/dependency
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    rebase-strategy: "disabled"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "gh-action:"
