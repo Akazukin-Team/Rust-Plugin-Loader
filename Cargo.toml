@@ -6,7 +6,7 @@ members = ["crates/sample_app", "crates/loader_impl", "crates/plugin_api"]
 authors = ["Akazukin-Team"]
 edition = "2024"
 rust-version = "1.93.0"
-repository = "https://github.com/Akazukin-Team/<PLACEHOLDER_REPO>.git"
+repository = "https://github.com/Akazukin-Team/Rust-Plugin-Loader.git"
 
 [workspace.dependencies]
 tokio = { version = "1", features = ["full"] }
