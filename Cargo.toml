@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/sample_app", "crates/loader_impl", "crates/plugin_api"]
+members = ["crates/sample_app", "crates/loader_impl", "crates/plugin_api", "crates/plugin_sample"]
 
 [workspace.package]
 authors = ["Akazukin-Team"]
