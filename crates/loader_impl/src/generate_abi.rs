@@ -36,6 +36,42 @@ macro_rules! generate_abi {
 
                 Ok(std::sync::Arc::new(table))
             }
+
+            $(
+                $crate::generate_abi_method! {
+                    $(#[$attr])*
+                    $fn_name($($arg: $arg_ty),*) $(-> $ret)?
+                }
+            )*
+        }
+    }
+}
+
+#[macro_export]
+macro_rules! generate_abi_method {
+    // return void
+    ($(#[$attr:meta])* $fn_name:ident($($arg:ident: $arg_ty:ty),*) -> $ret:ty) => {
+        $(#[$attr])*
+        pub fn $fn_name(&self, $($arg: $arg_ty),*) -> Option<$ret> {
+            if let Some(func) = self.$fn_name {
+                unsafe {
+                    Some(func($($arg),*))
+                }
+            } else {
+                None
+            }
+        }
+    };
+
+    // return object
+    ($(#[$attr:meta])* $fn_name:ident($($arg:ident: $arg_ty:ty),*)) => {
+        $(#[$attr])*
+        pub fn $fn_name(&self, $($arg: $arg_ty),*) {
+            if let Some(func) = self.$fn_name {
+                unsafe {
+                    func($($arg),*)
+                }
+            }
         }
     };
 }
