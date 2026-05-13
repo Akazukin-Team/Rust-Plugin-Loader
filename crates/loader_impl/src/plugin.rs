@@ -77,7 +77,7 @@ impl PluginContext {
         let mut name = String::new();
         let mut version = String::new();
         let mut deps_vec: Vec<String> = Vec::new();
-        let vt_ref: &PluginVTable = &*vtable;
+        let vt_ref: &PluginVTable = &vtable;
         // read name/version from dedicated getters (if present)
         if let Some(get_name) = vt_ref.plugin_get_name {
             unsafe {
