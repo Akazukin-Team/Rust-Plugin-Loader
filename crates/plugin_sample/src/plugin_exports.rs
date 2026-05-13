@@ -10,7 +10,7 @@ static mut META_DEPS_STRINGS: Option<Box<Vec<CString>>> = None;
 static mut META_DEPS_PTRS: Option<Box<[*const c_char]>> = None;
 static INIT_DEPS: Once = Once::new();
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn plugin_init() -> *const *const c_char {
     unsafe {
         INIT_META.call_once(|| {
@@ -31,7 +31,7 @@ pub extern "C" fn plugin_init() -> *const *const c_char {
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn plugin_free() {
     unsafe {
         if let Some(boxed) = META_META_STRINGS.take() {
@@ -49,29 +49,29 @@ pub extern "C" fn plugin_free() {
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn plugin_on_load() {}
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn plugin_on_unload() {}
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn plugin_on_enable() {}
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn plugin_on_disable() {}
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn plugin_get_name() -> *const c_char {
     b"example_plugin\0".as_ptr() as *const c_char
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn plugin_get_version() -> *const c_char {
     b"0.1.0\0".as_ptr() as *const c_char
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn plugin_get_dependencies() -> *const *const c_char {
     unsafe {
         INIT_DEPS.call_once(|| {
