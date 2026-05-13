@@ -17,13 +17,13 @@ macro_rules! generate_abi {
         }
         impl $struct_name {
             /// Load a dynamic library from a path and build the vtable.
-            pub unsafe fn load(path: &str) -> Result<std::sync::Arc<Self>, Box<dyn std::error::Error>> {
+            pub fn load(path: &str) -> Result<std::sync::Arc<Self>, Box<dyn std::error::Error>> {
                 let lib = std::sync::Arc::new(unsafe { libloading::Library::new(path)? });
                 unsafe { Self::load_from_lib(lib) }
             }
 
             /// Build the vtable from the loaded `Arc<Library>`.
-            pub unsafe fn load_from_lib(lib: std::sync::Arc<libloading::Library>) -> Result<std::sync::Arc<Self>, Box<dyn std::error::Error>> {
+            pub fn load_from_lib(lib: std::sync::Arc<libloading::Library>) -> Result<std::sync::Arc<Self>, Box<dyn std::error::Error>> {
                 // Get symbols
                 $(
                     let $fn_name = unsafe { (&*lib).get(stringify!($fn_name).as_bytes()) }.ok().map(|s| *s);
