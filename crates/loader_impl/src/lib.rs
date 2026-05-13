@@ -4,7 +4,6 @@ mod plugin;
 mod plugin2;
 
 pub use manager::{PluginManager, get_global_plugin_manager, set_global_plugin_manager};
-pub use plugin::Plugin;
 pub use plugin2::PluginInstance;
 use std::error::Error;
 

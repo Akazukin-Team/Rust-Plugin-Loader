@@ -1,8 +1,9 @@
 use crate::generate_abi;
+use std::error::Error;
 use std::ffi::CStr;
 use std::os::raw::c_char;
 use std::path::Path;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 // Generate a vtable for plugin symbols. Names here must match exported symbol names.
 generate_abi!(PluginVTable, {
@@ -32,44 +33,33 @@ impl PluginMeta {
         }
     }
 
-    pub fn name(&self) -> String {
-        self.name.clone()
+    pub fn get_name(&self) -> &String {
+        &self.name
     }
 
-    pub fn version(&self) -> String {
-        self.version.clone()
+    pub fn get_version(&self) -> &String {
+        &self.version
     }
 
-    pub fn dependencies(&self) -> Vec<String> {
-        self.deps.clone()
-    }
-}
-
-pub struct Plugin {
-    vtable: Arc<PluginVTable>,
-}
-
-impl Plugin {
-    pub fn new() -> Result<Self, Box<dyn std::error::Error>> {
-        let res = PluginVTable::load("")?;
-        Ok(Self { vtable: res })
+    pub fn get_dependencies(&self) -> &Vec<String> {
+        &self.deps
     }
 }
 
 pub struct PluginContext {
-    pub meta: std::sync::Mutex<PluginMeta>,
-    pub vtable: Arc<PluginVTable>,
+    pub meta: PluginMeta,
+    pub vtable: Option<Arc<PluginVTable>>,
 }
 
 impl PluginContext {
-    fn new(meta: PluginMeta, vtable: Arc<PluginVTable>) -> Self {
+    pub fn new(meta: PluginMeta, vtable: Option<Arc<PluginVTable>>) -> Self {
         Self {
-            meta: std::sync::Mutex::new(meta),
+            meta,
             vtable,
         }
     }
 
-    pub fn load<P: AsRef<Path>>(path: P) -> Result<Arc<Self>, String> {
+    pub fn load<P: AsRef<Path>>(path: P) -> Result<Self, String> {
         let vtable = PluginVTable::load(path.as_ref().to_str().ok_or("invalid path")?)
             .map_err(|e| e.to_string())?;
 
@@ -79,6 +69,7 @@ impl PluginContext {
         let mut deps_vec: Vec<String> = Vec::new();
         let vt_ref: &PluginVTable = &vtable;
         // read name/version from dedicated getters (if present)
+
         if let Some(get_name) = vt_ref.plugin_get_name {
             unsafe {
                 let p = get_name();
@@ -120,8 +111,6 @@ impl PluginContext {
         }
 
         let meta = PluginMeta::new(name, version, deps_vec);
-        let ctx = Arc::new(PluginContext::new(meta, vtable));
-        Ok(ctx)
+        Ok(PluginContext::new(meta, Some(vtable)))
     }
 }
-

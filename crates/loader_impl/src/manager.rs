@@ -1,48 +1,10 @@
-use crate::plugin::Plugin;
+use crate::plugin::{Plugin, PluginContext};
 use semver::{Version, VersionReq};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex, OnceLock};
 
-pub enum PluginEntry {
-    Host {
-        name: String,
-        version: String,
-    },
-    Dynamic {
-        context: Arc<crate::plugin::PluginContext>,
-    },
-}
-
-impl PluginEntry {
-    pub fn name(&self) -> String {
-        match self {
-            PluginEntry::Host { name, .. } => name.clone(),
-            PluginEntry::Dynamic { context } => {
-                if let Ok(lock) = context.meta.lock() {
-                    lock.name.clone()
-                } else {
-                    String::new()
-                }
-            }
-        }
-    }
-
-    pub fn version(&self) -> String {
-        match self {
-            PluginEntry::Host { version, .. } => version.clone(),
-            PluginEntry::Dynamic { context } => {
-                if let Ok(lock) = context.meta.lock() {
-                    lock.version.clone()
-                } else {
-                    String::new()
-                }
-            }
-        }
-    }
-}
-
 pub struct PluginManager {
-    plugins: Mutex<HashMap<String, PluginEntry>>,
+    plugins: Mutex<HashMap<String, PluginContext>>,
 }
 
 impl PluginManager {
@@ -51,6 +13,7 @@ impl PluginManager {
         // register loader as a host entry under key "host:loader"
         let loader_key = "host:loader".to_string();
         let loader_ver = crate::loader_version().to_string();
+        let loader = PluginContext::new()
         m.insert(
             loader_key,
             PluginEntry::Host {
@@ -217,8 +180,8 @@ impl PluginManager {
         if let Ok(mut map) = self.plugins.lock() {
             if let Some(entry) = map.remove(&key) {
                 if let PluginEntry::Dynamic { context } = entry {
-                    context.on_unload();
-                    context.free();
+                    Arc::clone(&context.vtable).plugin_on_unload();
+                    &context.free();
                 }
             }
             Ok(())
