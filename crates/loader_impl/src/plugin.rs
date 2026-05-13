@@ -45,6 +45,17 @@ impl PluginMeta {
     }
 }
 
+pub struct Plugin {
+    vtable: Arc<PluginVTable>,
+}
+
+impl Plugin {
+    pub fn new() -> Result<Self, Box<dyn std::error::Error>> {
+        let res = PluginVTable::load("")?;
+        Ok(Self { vtable: res })
+    }
+}
+
 pub struct PluginContext {
     pub meta: std::sync::Mutex<PluginMeta>,
     pub vtable: Arc<PluginVTable>,
@@ -59,7 +70,7 @@ impl PluginContext {
     }
 
     pub fn load<P: AsRef<Path>>(path: P) -> Result<Arc<Self>, String> {
-        let vtable = unsafe { PluginVTable::load(path.as_ref().to_str().ok_or("invalid path")?) }
+        let vtable = PluginVTable::load(path.as_ref().to_str().ok_or("invalid path")?)
             .map_err(|e| e.to_string())?;
 
         // initialize meta by calling plugin_init if present
@@ -112,54 +123,5 @@ impl PluginContext {
         let ctx = Arc::new(PluginContext::new(meta, vtable));
         Ok(ctx)
     }
-
-    pub fn on_load(&self) -> Result<(), String> {
-        if let Some(f) = (*self.vtable).plugin_on_load {
-            unsafe {
-                f();
-            }
-        }
-        Ok(())
-    }
-
-    pub fn on_unload(&self) {
-        if let Some(f) = (*self.vtable).plugin_on_unload {
-            unsafe {
-                f();
-            }
-        }
-    }
-
-    pub fn on_enable(&self) -> Result<(), String> {
-        if let Some(f) = (*self.vtable).plugin_on_enable {
-            unsafe {
-                f();
-            }
-        }
-        Ok(())
-    }
-
-    pub fn on_disable(&self) {
-        if let Some(f) = (*self.vtable).plugin_on_disable {
-            unsafe {
-                f();
-            }
-        }
-    }
-
-    pub fn free(&self) {
-        if let Some(f) = (*self.vtable).plugin_free {
-            unsafe {
-                f();
-            }
-        }
-        if let Ok(mut lock) = self.meta.lock() {
-            lock.name = String::new();
-            lock.version = String::new();
-            lock.deps.clear();
-        }
-    }
 }
 
-// keep backwards compatibility alias
-pub type Plugin = PluginContext;
