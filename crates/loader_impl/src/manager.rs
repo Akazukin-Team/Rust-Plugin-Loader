@@ -1,26 +1,22 @@
-use crate::plugin::{Plugin, PluginContext};
+use crate::plugin::{PluginContext, PluginMeta};
+use libloading::Error;
 use semver::{Version, VersionReq};
-use std::collections::HashMap;
-use std::sync::{Arc, Mutex, OnceLock};
+use std::{error::Error, sync::{Arc, Mutex, OnceLock}};
 
 pub struct PluginManager {
-    plugins: Mutex<HashMap<String, PluginContext>>,
+    plugins: Mutex<Vec<PluginContext>>,
 }
 
 impl PluginManager {
     pub fn new() -> Self {
-        let mut m = HashMap::new();
+        let mut m = Vec::new();
         // register loader as a host entry under key "host:loader"
         let loader_key = "host:loader".to_string();
         let loader_ver = crate::loader_version().to_string();
-        let loader = PluginContext::new()
-        m.insert(
-            loader_key,
-            PluginEntry::Host {
-                name: "loader".to_string(),
-                version: loader_ver,
-            },
-        );
+
+        let loader_meta = PluginMeta::new(loader_key, loader_ver, Vec::new());
+        m.push(PluginContext::new(loader_meta, None));
+
         Self {
             plugins: Mutex::new(m),
         }
@@ -31,14 +27,14 @@ impl PluginManager {
         let key = abs.to_string_lossy().into_owned();
 
         // If already loaded, return its name
-        if let Ok(map) = self.plugins.lock() {
-            if let Some(existing) = map.get(&key) {
-                return Ok(existing.name());
-            }
+        let plugins = Mutex::clone(&self.plugins).lock().unwrap();
+        if plugins.iter().any(|p| p.meta.name == key) {
+            let err = format!("The plugin is already registered; %s", key);
+                return Error(err.to_string());
         }
 
         // Load the plugin library first to inspect declared dependencies.
-        let context = Plugin::load(&abs)?;
+        let context = PluginContext::load(&abs)?;
         let deps = if let Ok(lock) = context.meta.lock() {
             lock.deps.clone()
         } else {
