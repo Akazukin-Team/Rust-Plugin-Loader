@@ -1,7 +1,7 @@
 use crate::plugin::{PluginContext, PluginMeta};
 use libloading::Error;
 use semver::{Version, VersionReq};
-use std::{error::Error, sync::{Arc, Mutex, OnceLock}};
+use std::sync::{Arc, Mutex, OnceLock};
 
 pub struct PluginManager {
     plugins: Mutex<Vec<PluginContext>>,

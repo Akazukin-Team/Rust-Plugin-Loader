@@ -1,9 +1,8 @@
 use crate::generate_abi;
-use std::error::Error;
 use std::ffi::CStr;
 use std::os::raw::c_char;
 use std::path::Path;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 // Generate a vtable for plugin symbols. Names here must match exported symbol names.
 generate_abi!(PluginVTable, {
@@ -53,10 +52,7 @@ pub struct PluginContext {
 
 impl PluginContext {
     pub fn new(meta: PluginMeta, vtable: Option<Arc<PluginVTable>>) -> Self {
-        Self {
-            meta,
-            vtable,
-        }
+        Self { meta, vtable }
     }
 
     pub fn load<P: AsRef<Path>>(path: P) -> Result<Self, String> {

@@ -56,7 +56,7 @@ impl PluginInstance {
         let vtable = unsafe { PluginVTable::load(path)? };
 
         // Generate a port to refer vtable
-        Ok(PluginInstance::new(PluginPort::new(Arc::clone(&vtable))))
+        Ok(PluginInstance::new(PluginPort::new(vtable)))
     }
 
     pub fn get_port(&self) -> &PluginPort {
