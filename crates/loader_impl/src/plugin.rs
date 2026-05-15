@@ -66,7 +66,7 @@ impl PluginContext {
         let vt_ref: &PluginVTable = &vtable;
         // read name/version from dedicated getters (if present)
 
-        if let Some(get_name) = vt_ref.plugin_get_name {
+        if let Some(get_name) = vt_ref.plugin_get_name() {
             unsafe {
                 let p = get_name();
                 if !p.is_null() {
@@ -74,7 +74,7 @@ impl PluginContext {
                 }
             }
         }
-        if let Some(get_ver) = vt_ref.plugin_get_version {
+        if let Some(get_ver) = vt_ref.plugin_get_version() {
             unsafe {
                 let p = get_ver();
                 if !p.is_null() {
@@ -82,7 +82,7 @@ impl PluginContext {
                 }
             }
         }
-        if let Some(get_deps) = vt_ref.plugin_get_dependencies {
+        if let Some(get_deps) = vt_ref.plugin_get_dependencies() {
             unsafe {
                 let arr = get_deps();
                 if !arr.is_null() {
@@ -109,4 +109,20 @@ impl PluginContext {
         let meta = PluginMeta::new(name, version, deps_vec);
         Ok(PluginContext::new(meta, Some(vtable)))
     }
+}
+
+#[repr(C)]
+pub struct Array {
+    pub address: *const c_int,
+    pub len: usize;
+}
+
+impl Array {
+    pub fn to_element(vec: Vec<Any>) -> Array {
+        Array {
+            address:vec.as_ptr()
+    }
+}
+
+pub extern "C" get_arr() -> Array {
 }
