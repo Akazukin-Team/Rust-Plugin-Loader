@@ -1,0 +1,17 @@
+[workspace]
+resolver = "3"
+members = ["crates/lib", "crates/macros", "crates/sample_app", "crates/loader_impl", "crates/plugin_api", "crates/plugin_sample"]
+
+[workspace.package]
+authors = ["Akazukin-Team"]
+edition = "2024"
+rust-version = "1.93.0"
+repository = "https://github.com/Akazukin-Team/Rust-Plugin-Loader.git"
+
+[workspace.dependencies]
+tokio = { version = "1", features = ["full"] }
+typesafe_builder = "1.6.0"
+service = { version = "0.1.0", registry = "akazukin-mixed" }
+libloading = "0.9"
+thiserror = "2"
+
