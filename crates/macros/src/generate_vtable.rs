@@ -55,10 +55,7 @@ impl Parse for VTableMethod {
             let raw_ty = ret_content.parse()?;
             ret_content.parse::<RArrow>()?;
             let wrapper_ty = ret_content.parse()?;
-            ret = Some(VTableReturnType {
-                raw_ty,
-                wrapper_ty,
-            });
+            ret = Some(VTableReturnType { raw_ty, wrapper_ty });
         }
 
         input.parse::<Semi>()?;
@@ -178,22 +175,38 @@ pub fn generate_macro(input: TokenStream) -> TokenStream {
             )
         };
 
-        let field_init = if is_optional {
-            quote! { raw_fn }
-        } else {
+        let c_str_name = format!("{}\0", fn_name_str);
+        let field_init = quote! {
+            let res = unsafe { (&*lib).get(#c_str_name.as_bytes()) };
+            let ret = match res {
+                Ok(sym) => Ok(Some(*sym)),
+                Err(e) => match e {
+                    libloading::Error::DlSym { .. }
+                    | libloading::Error::DlSymUnknown { .. }
+                    | libloading::Error::GetProcAddress { .. }
+                    | libloading::Error::GetProcAddressUnknown { .. } => Ok(None),
+                    other => Err(plugin_api::VTableError::LoadingError(other)),
+                },
+            }?;
+        };
+        let field_init = if !is_optional {
             quote! {
-                raw_fn.ok_or(VTableError::MissingFunction(#fn_name_str))?
+                #field_init
+                ret.ok_or(plugin_api::VTableError::MissingFunction(#fn_name_str))?
             }
+        } else {
+            field_init
         };
 
         vtable_fields.push(quote! {
             pub #fn_ident:  #field_ty
         });
 
-        let c_str_name = format!("{}\0", fn_name_str);
         load_checks.push(quote! {
-            let raw_fn = unsafe { (&*lib).get(#c_str_name.as_bytes()) }.ok().map(|s| *s);
-            let #fn_ident = #field_init;
+            let #fn_ident = {
+                #field_init;
+                ret
+            };
         });
 
         field_inits.push(quote! {
@@ -210,12 +223,14 @@ pub fn generate_macro(input: TokenStream) -> TokenStream {
         }
 
         impl #struct_ident {
-            pub fn load(path: &str) -> Result<std::sync::Arc<Self>, libloading::Error> {
-                let lib = std::sync::Arc::new(unsafe { libloading::Library::new(path)? });
+            pub fn load(path: &str) -> Result<std::sync::Arc<Self>, plugin_api::VTableError> {
+                let lib = std::sync::Arc::new(unsafe {
+                    libloading::Library::new(path).map_err(|e| plugin_api::VTableError::LoadingError(e))?
+                });
                 Self::load_from_lib(lib)
             }
 
-            pub fn load_from_lib(lib: std::sync::Arc<libloading::Library>) -> Result<std::sync::Arc<Self>, libloading::Error> {
+            pub fn load_from_lib(lib: std::sync::Arc<libloading::Library>) -> Result<std::sync::Arc<Self>, plugin_api::VTableError> {
                 #(#load_checks)*
 
                 let table = Self {
@@ -236,3 +251,4 @@ pub fn generate_macro(input: TokenStream) -> TokenStream {
 
     expanded.into()
 }
+

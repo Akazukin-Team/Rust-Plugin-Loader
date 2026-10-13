@@ -15,7 +15,6 @@ pub type PluginVersionFn = unsafe extern "C" fn() -> *const c_char;
 pub type PluginInitMetaFn = unsafe extern "C" fn() -> *const *const c_char;
 pub type PluginFreeMetaFn = unsafe extern "C" fn();
 
-// Re-export commonly-used std types for convenience
 pub use std::ffi::CStr;
 pub use std::ffi::CString;
 pub use std::os::raw::c_char as CCHAR;

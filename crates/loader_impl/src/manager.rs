@@ -35,7 +35,6 @@ impl Matcher for PathMatcher {
 impl PluginManager {
     pub fn new() -> Self {
         let mut map = HashMap::new();
-        // register loader as a host entry under key "host:loader"
         let loader_key = "host:loader".to_string();
         let loader_ver = crate::loader_version().to_string();
 
@@ -88,7 +87,6 @@ impl PluginManager {
         let deps = ctx.get_meta().get_dependencies();
         let mut newly_loaded: Vec<String> = Vec::new();
 
-        // helper closure: verify that an entry exists in the map and satisfies an optional version requirement
         let verify_loaded = |key: &str,
                              req_opt: &Option<String>,
                              newly_loaded: &mut Vec<String>|
@@ -150,19 +148,16 @@ impl PluginManager {
                 (dep.clone(), None)
             };
 
-            // normalize host short names like "loader" to host:<name>
             if path_part == "loader" || path_part.starts_with("host:") {
                 let host_key = if path_part.starts_with("host:") {
                     path_part.clone()
                 } else {
                     format!("host:{}", path_part)
                 };
-                // verify host entry exists and satisfies version
                 verify_loaded(&host_key, &ver_req_opt, &mut newly_loaded)?;
                 continue;
             }
 
-            // dynamic dependency: canonicalize, then either verify existing or load then verify
             let dep_abs = std::fs::canonicalize(&path_part).map_err(|e| {
                 for k in newly_loaded.iter().rev() {
                     let _ = self.unload_plugin(k);
@@ -171,7 +166,6 @@ impl PluginManager {
             })?;
             let dep_key = dep_abs.to_string_lossy().into_owned();
 
-            // if not loaded, attempt to load
             if let Ok(map) = self.plugins.lock() {
                 if !map.contains_key(&dep_key) {
                     match self.load_plugin(dep_abs.to_string_lossy().as_ref()) {
@@ -191,7 +185,6 @@ impl PluginManager {
                 return Err("failed to lock plugin map".to_string());
             }
 
-            // verify the (now-loaded) dependency satisfies version
             verify_loaded(&dep_key, &ver_req_opt, &mut newly_loaded)?;
         }
 

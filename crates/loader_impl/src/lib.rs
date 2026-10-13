@@ -7,7 +7,6 @@ pub use manager::{PluginManager, get_global_plugin_manager, set_global_plugin_ma
 pub use plugin2::PluginInstance;
 use std::error::Error;
 
-// Loader version exported so plugins can declare dependency on the loader itself.
 pub const LOADER_VERSION: &str = "0.1.0";
 
 pub fn loader_version() -> &'static str {
@@ -15,13 +14,10 @@ pub fn loader_version() -> &'static str {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    // Load the dynamic library
     let plugin = PluginInstance::load("./my_plugin.so")?;
 
-    // Dummy data
     let mut vec = vec![];
 
-    // Execute functions across the ABI boundary
     plugin.get_port().process(&mut vec);
     plugin.get_port().process2(0.8);
 
@@ -62,7 +58,7 @@ pub mod manager;
 pub mod plugin;
 
 pub mod plugin3 {
-    use plugin_api::VTableError;
+    use macros::{generate_ffi_object, generate_vtable};
     use std::ffi::{CStr, c_int};
     use std::os::raw::c_char;
     use std::path::Path;
@@ -125,67 +121,146 @@ pub mod plugin3 {
         pub plugin_on_disable: Option<unsafe extern "C" fn() -> ()>,
     }
     impl PluginVTable {
-        pub fn load(path: &str) -> Result<std::sync::Arc<Self>, VTableError> {
+        pub fn load(path: &str) -> Result<std::sync::Arc<Self>, plugin_api::VTableError> {
             let lib = std::sync::Arc::new(unsafe {
-                libloading::Library::new(path).map_err(|e| VTableError::LoadingError(e))?
+                libloading::Library::new(path)
+                    .map_err(|e| plugin_api::VTableError::LoadingError(e))?
             });
             Self::load_from_lib(lib)
         }
         pub fn load_from_lib(
             lib: std::sync::Arc<libloading::Library>,
-        ) -> Result<std::sync::Arc<Self>, VTableError> {
-            let raw_fn = unsafe { (&*lib).get("plugin_get_name\0".as_bytes()) }
-                .ok()
-                .map(|s| *s);
-            let plugin_get_name =
-                raw_fn.expect("Required function \'plugin_get_name\' not found in library");
-            let plugin_get_version: unsafe extern "C" fn() -> *const c_char = {
-                let res = unsafe { (&*lib).get("plugin_get_version\0".as_bytes()) };
-                let ret: Option<unsafe extern "C" fn() -> *const c_char> = match res {
+        ) -> Result<std::sync::Arc<Self>, plugin_api::VTableError> {
+            let plugin_get_name = {
+                let res = unsafe { (&*lib).get("plugin_get_name\0".as_bytes()) };
+                let ret = match res {
                     Ok(sym) => Ok(Some(*sym)),
                     Err(e) => match e {
                         libloading::Error::DlSym { .. }
                         | libloading::Error::DlSymUnknown { .. }
                         | libloading::Error::GetProcAddress { .. }
                         | libloading::Error::GetProcAddressUnknown { .. } => Ok(None),
-                        other => Err(VTableError::LoadingError(other)),
+                        other => Err(plugin_api::VTableError::LoadingError(other)),
                     },
                 }?;
-
-                let ret = ret.ok_or(VTableError::MissingFunction(
-                    "plugin_get_version".to_string(),
+                ret.ok_or(plugin_api::VTableError::MissingFunction("plugin_get_name"))?;
+                ret
+            };
+            let plugin_get_version = {
+                let res = unsafe { (&*lib).get("plugin_get_version\0".as_bytes()) };
+                let ret = match res {
+                    Ok(sym) => Ok(Some(*sym)),
+                    Err(e) => match e {
+                        libloading::Error::DlSym { .. }
+                        | libloading::Error::DlSymUnknown { .. }
+                        | libloading::Error::GetProcAddress { .. }
+                        | libloading::Error::GetProcAddressUnknown { .. } => Ok(None),
+                        other => Err(plugin_api::VTableError::LoadingError(other)),
+                    },
+                }?;
+                ret.ok_or(plugin_api::VTableError::MissingFunction(
+                    "plugin_get_version",
                 ))?;
                 ret
             };
-
-            let raw_fn = unsafe { (&*lib).get("plugin_get_dependencies\0".as_bytes()) }
-                .ok()
-                .map(|s| *s);
-            let plugin_get_dependencies = raw_fn;
-            let raw_fn = unsafe { (&*lib).get("plugin_init\0".as_bytes()) }
-                .ok()
-                .map(|s| *s);
-            let plugin_init = raw_fn;
-            let raw_fn = unsafe { (&*lib).get("plugin_free\0".as_bytes()) }
-                .ok()
-                .map(|s| *s);
-            let plugin_free = raw_fn;
-            let raw_fn = unsafe { (&*lib).get("plugin_on_load\0".as_bytes()) }
-                .ok()
-                .map(|s| *s);
-            let plugin_on_load = raw_fn;
-            let raw_fn = unsafe { (&*lib).get("plugin_on_unload\0".as_bytes()) }
-                .ok()
-                .map(|s| *s);
-            let plugin_on_unload = raw_fn;
-            let raw_fn = unsafe { (&*lib).get("plugin_on_enable\0".as_bytes()) }
-                .ok()
-                .map(|s| *s);
-            let plugin_on_enable = raw_fn;
-            let raw_fn = unsafe { (&*lib).get("plugin_on_disable\0".as_bytes()) }
-                .ok()
-                .map(|s| *s);
-            let plugin_on_disable = raw_fn;
+            let plugin_get_dependencies = {
+                let res = unsafe { (&*lib).get("plugin_get_dependencies\0".as_bytes()) };
+                let ret = match res {
+                    Ok(sym) => Ok(Some(*sym)),
+                    Err(e) => match e {
+                        libloading::Error::DlSym { .. }
+                        | libloading::Error::DlSymUnknown { .. }
+                        | libloading::Error::GetProcAddress { .. }
+                        | libloading::Error::GetProcAddressUnknown { .. } => Ok(None),
+                        other => Err(plugin_api::VTableError::LoadingError(other)),
+                    },
+                }?;
+                ret
+            };
+            let plugin_init = {
+                let res = unsafe { (&*lib).get("plugin_init\0".as_bytes()) };
+                let ret = match res {
+                    Ok(sym) => Ok(Some(*sym)),
+                    Err(e) => match e {
+                        libloading::Error::DlSym { .. }
+                        | libloading::Error::DlSymUnknown { .. }
+                        | libloading::Error::GetProcAddress { .. }
+                        | libloading::Error::GetProcAddressUnknown { .. } => Ok(None),
+                        other => Err(plugin_api::VTableError::LoadingError(other)),
+                    },
+                }?;
+                ret
+            };
+            let plugin_free = {
+                let res = unsafe { (&*lib).get("plugin_free\0".as_bytes()) };
+                let ret = match res {
+                    Ok(sym) => Ok(Some(*sym)),
+                    Err(e) => match e {
+                        libloading::Error::DlSym { .. }
+                        | libloading::Error::DlSymUnknown { .. }
+                        | libloading::Error::GetProcAddress { .. }
+                        | libloading::Error::GetProcAddressUnknown { .. } => Ok(None),
+                        other => Err(plugin_api::VTableError::LoadingError(other)),
+                    },
+                }?;
+                ret
+            };
+            let plugin_on_load = {
+                let res = unsafe { (&*lib).get("plugin_on_load\0".as_bytes()) };
+                let ret = match res {
+                    Ok(sym) => Ok(Some(*sym)),
+                    Err(e) => match e {
+                        libloading::Error::DlSym { .. }
+                        | libloading::Error::DlSymUnknown { .. }
+                        | libloading::Error::GetProcAddress { .. }
+                        | libloading::Error::GetProcAddressUnknown { .. } => Ok(None),
+                        other => Err(plugin_api::VTableError::LoadingError(other)),
+                    },
+                }?;
+                ret
+            };
+            let plugin_on_unload = {
+                let res = unsafe { (&*lib).get("plugin_on_unload\0".as_bytes()) };
+                let ret = match res {
+                    Ok(sym) => Ok(Some(*sym)),
+                    Err(e) => match e {
+                        libloading::Error::DlSym { .. }
+                        | libloading::Error::DlSymUnknown { .. }
+                        | libloading::Error::GetProcAddress { .. }
+                        | libloading::Error::GetProcAddressUnknown { .. } => Ok(None),
+                        other => Err(plugin_api::VTableError::LoadingError(other)),
+                    },
+                }?;
+                ret
+            };
+            let plugin_on_enable = {
+                let res = unsafe { (&*lib).get("plugin_on_enable\0".as_bytes()) };
+                let ret = match res {
+                    Ok(sym) => Ok(Some(*sym)),
+                    Err(e) => match e {
+                        libloading::Error::DlSym { .. }
+                        | libloading::Error::DlSymUnknown { .. }
+                        | libloading::Error::GetProcAddress { .. }
+                        | libloading::Error::GetProcAddressUnknown { .. } => Ok(None),
+                        other => Err(plugin_api::VTableError::LoadingError(other)),
+                    },
+                }?;
+                ret
+            };
+            let plugin_on_disable = {
+                let res = unsafe { (&*lib).get("plugin_on_disable\0".as_bytes()) };
+                let ret = match res {
+                    Ok(sym) => Ok(Some(*sym)),
+                    Err(e) => match e {
+                        libloading::Error::DlSym { .. }
+                        | libloading::Error::DlSymUnknown { .. }
+                        | libloading::Error::GetProcAddress { .. }
+                        | libloading::Error::GetProcAddressUnknown { .. } => Ok(None),
+                        other => Err(plugin_api::VTableError::LoadingError(other)),
+                    },
+                }?;
+                ret
+            };
             let table = Self {
                 _lib: std::sync::Arc::clone(&lib),
                 plugin_get_name,

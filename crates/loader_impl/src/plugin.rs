@@ -1,6 +1,4 @@
-//use crate::generate_abi;
 use macros::{generate_ffi_object, generate_vtable};
-use std::any::Any;
 use std::ffi::{CStr, c_int};
 use std::os::raw::c_char;
 use std::path::Path;
@@ -70,7 +68,6 @@ impl PluginContext {
         let vtable = PluginVTable::load(path.as_ref().to_str().ok_or("invalid path")?)
             .map_err(|e| e.to_string())?;
 
-        // initialize meta by calling plugin_init if present
         let name: String;
         let version: String;
         let mut deps_vec: Vec<String> = Vec::new();
