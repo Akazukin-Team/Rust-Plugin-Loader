@@ -1,0 +1,167 @@
+[
+  {
+    "name": "ci/skip",
+    "description": "skipping CI processes",
+    "color": "00ff00"
+  },
+  {
+    "name": "design/external",
+    "description": "External design",
+    "color": "ff8eff"
+  },
+  {
+    "name": "design/internal",
+    "description": "Internal design",
+    "color": "ff8eff"
+  },
+  {
+    "name": "priority/high",
+    "description": "Priority: High",
+    "color": "7fff7f"
+  },
+  {
+    "name": "priority/middle",
+    "description": "Priority: Middle",
+    "color": "7fff7f"
+  },
+  {
+    "name": "priority/low",
+    "description": "Priority: Low",
+    "color": "7fff7f"
+  },
+  {
+    "name": "test/integration",
+    "description": "Integration test",
+    "color": "ff7a7a"
+  },
+  {
+    "name": "test/system",
+    "description": "System test",
+    "color": "ff7a7a"
+  },
+  {
+    "name": "test/unit",
+    "description": "Unit test",
+    "color": "ff7a7a"
+  },
+  {
+    "name": "type/bug",
+    "description": "Bug reporting/fixing",
+    "color": "66ffff"
+  },
+  {
+    "name": "type/design",
+    "description": "Design related",
+    "color": "66ffff"
+  },
+  {
+    "name": "type/document",
+    "description": "Modifying document",
+    "color": "66ffff"
+  },
+  {
+    "name": "type/enhancement",
+    "description": "New feature or enhancement",
+    "color": "66ffff"
+  },
+  {
+    "name": "type/maintenance",
+    "description": "Maintenance related",
+    "color": "66ffff"
+  },
+  {
+    "name": "type/runtime",
+    "description": "Runtime related",
+    "color": "66ffff"
+  },
+  {
+    "name": "type/test",
+    "description": "Modifying Test code",
+    "color": "66ffff"
+  },
+  {
+    "name": "type/refactor",
+    "description": "Refactoring",
+    "color": "66ffff"
+  },
+  {
+    "name": "type/dependency",
+    "description": "Dependency related",
+    "color": "66ffff"
+  },
+  {
+    "name": "type/github",
+    "description": "GitHub related",
+    "color": "66ffff"
+  },
+  {
+    "name": "breaking/implementation",
+    "description": "Breaking changes in implementation",
+    "color": "ff0000"
+  },
+  {
+    "name": "breaking/api",
+    "description": "Breaking changes in API",
+    "color": "ff0000"
+  },
+  {
+    "name": "version/major",
+    "description": "Major version changes (breaking changes)",
+    "color": "4169e1"
+  },
+  {
+    "name": "version/minor",
+    "description": "Minor version changes (new features)",
+    "color": "4169e1"
+  },
+  {
+    "name": "version/patch",
+    "description": "Patch version changes (bug fixes)",
+    "color": "4169e1"
+  },
+  {
+    "name": "bot/dependabot",
+    "description": "'DependaBot's PR",
+    "color": "0099ff"
+  },
+  {
+    "name": "status/complete",
+    "description": "Completed task or issue",
+    "color": "228b22"
+  },
+  {
+    "name": "status/freeze",
+    "description": "Inactive or frozen task or issue",
+    "color": "228b22"
+  },
+  {
+    "name": "status/in-progress",
+    "description": "In progress task or issue",
+    "color": "228b22"
+  },
+  {
+    "name": "status/waiting",
+    "description": "Waiting for the proposer",
+    "color": "228b22"
+  },
+  {
+    "name": "status/duplicate",
+    "description": "Duplicate task or issue",
+    "color": "228b22"
+  },
+  {
+    "name": "difficulty/easy",
+    "description": "Difficulty: Easy",
+    "color": "ffff00"
+  },
+  {
+    "name": "difficulty/normal",
+    "description": "Difficulty: Normal",
+    "color": "ffff00"
+  },
+  {
+    "name": "difficulty/hard",
+    "description": "Difficulty: Hard",
+    "color": "ffff00"
+  }
+]
