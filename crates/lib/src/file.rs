@@ -1,6 +1,5 @@
 use crate::matcher::Matcher;
 use std::collections::HashSet;
-use std::error::Error;
 use std::fs;
 use std::io::{Error as IoError, ErrorKind, Result};
 use std::path::{Path, PathBuf};

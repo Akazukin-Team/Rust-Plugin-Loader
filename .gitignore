@@ -1,0 +1,8 @@
+# Ignore Cargo build output directory
+/target/
+
+
+# Ignore editor files or directies
+/.vscode/
+/.idea
+

@@ -1,11 +1,9 @@
 use crate::plugin::{PluginContext, PluginMeta};
 use lib::{file, matcher::Matcher};
-use libloading::Error;
 use semver::{Version, VersionReq};
 use std::{
     collections::HashMap,
-    error::Error as IoError,
-    path::{Path, PathBuf},
+    path::PathBuf,
     sync::{Arc, Mutex, OnceLock},
 };
 
