@@ -1,0 +1,17 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: images/Dockerfile
+    volumes:
+      - ..:/workspaces/app:cached
+
+      - /mnt/wslg:/mnt/wslg
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    environment:
+      - WAYLAND_DISPLAY=wayland-0
+      - XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir
+      - DISPLAY=:0
+    working_dir: /workspaces/app
+    command: sleep infinity
+

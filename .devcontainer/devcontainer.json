@@ -1,0 +1,11 @@
+{
+  "name": "Rust-Plugin-Loader",
+  "workspaceFolder": "/workspaces/app",
+  "dockerComposeFile": [
+    "./docker-compose.yml"
+  ],
+  "service": "app",
+  "overrideCommand": false,
+  "updateRemoteUserUID": true,
+  "remoteUser": "vscode"
+}
